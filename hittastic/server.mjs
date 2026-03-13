@@ -40,7 +40,6 @@ app.post('/login', (req, res) => {
     let msg = "";
     try {
         // TODO 1. replace with secure version using placeholders
-        // TODO 2. change to use passwords encrypted with bcrypt
         const stmt = db.prepare(`SELECT * FROM ht_users WHERE password='${req.body.password}' AND username='${req.body.username}'`);
         const results = stmt.all();
 
@@ -55,20 +54,6 @@ app.post('/login', (req, res) => {
         msg = `Internal error: ${e}`;
     }
     res.render('main', { msg: msg, username: req.session.username } );
-});
-
-app.post('/signup', (req, res) => {
-    let msg = "";
-    try {
-        // TODO 1. replace with secure version using placeholders
-        // TODO 2. change to use passwords encrypted with bcrypt
-        const stmt = db.prepare(`INSERT INTO ht_users (username, password, balance, creditcard) VALUES ('${req.body.username}', '${req.body.password}', 100.0, '1234567890123456')`);
-        const info = stmt.run();
-        msg = `Signed up with ID ${info.lastInsertRowid}`;
-    } catch(e) {
-        msg = `Internal error: ${e}`;
-    }
-    res.render('main', { msg: msg });    
 });
 
 
@@ -122,15 +107,7 @@ app.post('/buy', (req, res) => {
     } 
 });
 
-app.post('/song/new', (req, res) => {
-    try {
-        const stmt = db.prepare("INSERT INTO wadsongs(title, artist, year) VALUES (?,?,?)");
-        const info = stmt.run(req.body.title, req.body.artist, req.body.year);
-        res.render('main', { msg : `Song added with ID ${info.lastInsertRowid}`, username: req.session.username});
-    } catch(e) {    
-        res.render('main', {  msg: e.message, username: req.session.username } );
-    } 
-});
+
 
 app.post('/setcookie', (req, res) => {
     res.set('Set-Cookie', req.body.cookie);

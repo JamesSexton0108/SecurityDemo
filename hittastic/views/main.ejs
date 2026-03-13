@@ -30,21 +30,13 @@ if(locals.username) {
 <input name="password" id="password" type="password" /><br />
 <input type="submit" value="Go!" />
 </form>
-<h2>Signup</h2>
-<form method="post" action="/signup">
-<label for="username">Username</label><br />
-<input name="username" id="username" /><br />
-<label for="password">Password</label><br />
-<input name="password" id="password" type="password" /><br />
-<input type="submit" value="Go!" />
-</form>
 <% } %>
 </div>
 
 <div id='msg'><%-msg%></div>
 
 <div style='margin-bottom: 10px'>
-<h2>Search (non-AJAX)</h2>
+<h2>Search</h2>
 <form action='/search'>
 <label for='artist'>Artist:</label>
 <input id="artist" name="artist" />
