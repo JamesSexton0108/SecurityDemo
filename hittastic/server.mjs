@@ -3,6 +3,8 @@ import Database from 'better-sqlite3';
 import expressSession from 'express-session';
 import betterSqlite3Session from 'express-session-better-sqlite3';
 import db from './db.mjs';
+import xss from 'xss';
+import bcrypt from 'bcrypt';
 
 const app = express();
 
@@ -37,6 +39,10 @@ app.set('view engine' , 'ejs');
 
 // TODO signup with bcrypt
 app.post('/signup', (req, res) => {
+    async function signup() {
+        const encPass = await bcrypt.hash(pass,10)
+    }
+    
     res.render('main', { msg: "Not implemented yet"} );
 });
 
@@ -44,8 +50,8 @@ app.post('/login', (req, res) => {
     let msg = "";
     try {
         // TODO 1. replace with secure version using placeholders
-        const stmt = db.prepare(`SELECT * FROM ht_users WHERE password='${req.body.password}' AND username='${req.body.username}'`);
-        const results = stmt.all();
+        const stmt = db.prepare(`SELECT * FROM ht_users WHERE password=? AND username=?`);
+        const results = stmt.all(req.body.password, req.body.username);
 
         if(results.length > 0) {
             req.session.username = results[0].username;
@@ -95,19 +101,27 @@ app.get(['/search','/artist/:artist'], (req, res) => {
 });
 
 app.post('/buy', (req, res) => {
-    try {
+
+    const sanId = xss(req.body.id);
+    //if (/^\d+$/.exec(req.body.id) !== null) {
+    if (true) {
+        try {
         const stmt = db.prepare('SELECT * FROM wadsongs WHERE id=?');
-        const result = stmt.get(req.body.id);
+        const result = stmt.get(sanId);
         if(result) {
             const stmt2 = db.prepare('UPDATE wadsongs SET quantity=quantity+1 WHERE id=?');
             stmt2.run(req.body.id);
             const stmt3 = db.prepare('UPDATE ht_users SET balance=balance-? WHERE username=?');
             stmt3.run(result.price, req.session.username);
         }
-        res.render('main', { msg : `${req.userStatus}<br />You are buying the song with ID ${req.body.id}`, username: req.session.username});
+        res.render('main', { msg : `${req.userStatus}<br />You are buying the song with ID ${sanId}`, username: req.session.username});
     } catch(e) {    
         res.render('main', {  msg: e.message, username: req.session.username } );
     } 
+    } else {
+        res.render('main', { msg: 'Possible XSS attack detected, not running /buy endpoint'});
+    }
+    
 });
 
 
